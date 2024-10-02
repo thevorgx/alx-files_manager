@@ -1,22 +1,31 @@
-import redisClient from '../utils/redis';
+import crypto from 'crypto';
 import dbClient from '../utils/db';
 
-class AppController {
-  static getStatus(req, res) {
-    res.status(200).json({
-      redis: redisClient.isAlive(),
-      db: dbClient.isAlive(),
-    });
-  }
+class UsersController {
+  static async postNew(req, res) {
+    const { email, password } = req.body;
 
-  static async getStats(req, res) {
-    const users = await dbClient.nbUsers();
-    const files = await dbClient.nbFiles();
-    res.status(200).json({
-      users,
-      files,
-    });
+    if (!email) {
+      return res.status(400).json({ error: 'Missing email' });
+    }
+    if (!password) {
+      return res.status(400).json({ error: 'Missing password' });
+    }
+
+    const existingUser = await dbClient.db.collection('users').findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Already exist' });
+    }
+
+    const hashedPassword = crypto.createHash('sha1').update(password).digest('hex');
+    const newUser = {
+      email,
+      password: hashedPassword,
+    };
+
+    const result = await dbClient.db.collection('users').insertOne(newUser);
+    return res.status(201).json({ id: result.insertedId, email: newUser.email });
   }
 }
 
-export default AppController;
+export default UsersController;

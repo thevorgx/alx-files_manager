@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import AppController from '../controllers/AppController';
+import UsersController from '../controllers/UsersController'; // Import UsersController
 
 class Routes {
   constructor() {
@@ -10,6 +11,7 @@ class Routes {
   initializeRoutes() {
     this.router.get('/status', AppController.getStatus);
     this.router.get('/stats', AppController.getStats);
+    this.router.post('/users', UsersController.postNew);
   }
 
   getRouter() {
