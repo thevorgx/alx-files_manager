@@ -3,8 +3,9 @@ import redis from 'redis';
 class RedisClient {
   constructor() {
     this.client = redis.createClient();
+
     this.client.on('error', (err) => {
-      console.error(`Redis error: ${err}`);
+      console.error('Redis Error:', err);
     });
   }
 
@@ -17,21 +18,21 @@ class RedisClient {
       this.client.get(key, (err, reply) => {
         if (err) {
           reject(err);
-        } else {
-          resolve(reply);
+          return;
         }
+        resolve(reply);
       });
     });
   }
 
-  async set(key, value, duration) {
+  async set(key, value, durationInSeconds) {
     return new Promise((resolve, reject) => {
-      this.client.setex(key, duration, value, (err, reply) => {
+      this.client.set(key, value, 'EX', durationInSeconds, (err, reply) => {
         if (err) {
           reject(err);
-        } else {
-          resolve(reply);
+          return;
         }
+        resolve(reply);
       });
     });
   }
@@ -41,13 +42,12 @@ class RedisClient {
       this.client.del(key, (err, reply) => {
         if (err) {
           reject(err);
-        } else {
-          resolve(reply);
+          return;
         }
+        resolve(reply);
       });
     });
   }
 }
 
-const redisClient = new RedisClient();
-export default redisClient;
+export default new RedisClient();

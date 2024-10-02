@@ -11,35 +11,30 @@ class DBClient {
       useUnifiedTopology: true,
       useNewUrlParser: true,
     });
-
-    this.dbClient.connect()
+    this.dbClient
+      .connect()
       .then(() => {
-        this.db = this.dbClient.db(database);
-        console.log('MongoDB connected');
+        this.db = this.dbClient.db(`${database}`);
       })
       .catch((err) => {
-        console.error(`MongoDB connection error: ${err}`);
+        console.log(err);
       });
   }
 
   isAlive() {
-    return this.dbClient.topology && this.dbClient.topology.isConnected();
+    return this.dbClient.isConnected();
   }
 
   async nbUsers() {
-    if (!this.db) {
-      return 0;
-    }
-    const usersCollection = this.db.collection('users');
-    return usersCollection.countDocuments();
+    const users = this.db.collection('users');
+    const numberOfUsers = await users.countDocuments();
+    return numberOfUsers;
   }
 
   async nbFiles() {
-    if (!this.db) {
-      return 0;
-    }
-    const filesCollection = this.db.collection('files');
-    return filesCollection.countDocuments();
+    const files = this.db.collection('files');
+    const numberOfFiles = await files.countDocuments();
+    return numberOfFiles;
   }
 }
 
