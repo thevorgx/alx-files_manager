@@ -1,13 +1,29 @@
 import express from 'express';
-import routes from './routes/index';
+import Routes from './routes';
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+class App {
+  constructor() {
+    this.port = parseInt(process.env.PORT, 10) || 5000;
+    this.app = express();
+    this.initializeMiddlewares();
+    this.initializeRoutes();
+  }
 
-app.use('/', routes);
+  initializeMiddlewares() {
+    this.app.use(express.json());
+  }
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  initializeRoutes() {
+    const routes = new Routes();
+    this.app.use('/', routes.getRouter());
+  }
 
-export default app;
+  start() {
+    this.app.listen(this.port, () => {
+      console.log(`Server running on port ${this.port}`);
+    });
+  }
+}
+
+const server = new App();
+server.start();
