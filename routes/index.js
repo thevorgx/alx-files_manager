@@ -1,9 +1,22 @@
-import express from 'express';
-import AppController from '../controllers/AppController';
+import redisClient from '../utils/redis';
+import dbClient from '../utils/db';
 
-const router = express.Router();
+class AppController {
+  static getStatus(req, res) {
+    res.status(200).json({
+      redis: redisClient.isAlive(),
+      db: dbClient.isAlive(),
+    });
+  }
 
-router.get('/status', AppController.getStatus);
-router.get('/stats', AppController.getStats);
+  static async getStats(req, res) {
+    const users = await dbClient.nbUsers();
+    const files = await dbClient.nbFiles();
+    res.status(200).json({
+      users,
+      files,
+    });
+  }
+}
 
-export default router;
+export default AppController;
